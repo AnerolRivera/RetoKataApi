@@ -113,6 +113,7 @@ Para más detalles, consulta el archivo [`.github/workflows/apiTestKata.yml`](.g
 
 
 📜 Dependencias utilizadas
+
 📌 Listado de las principales dependencias de Maven (pom.xml)
 ```xml
 <dependencies>
@@ -185,8 +186,10 @@ Para más detalles, consulta el archivo [`.github/workflows/apiTestKata.yml`](.g
 </suite>
 
 ```
+
 📌 Ubicación de reportes generados
 Los reportes ExtentReports se guardan en la carpeta:
+
 📂 test-output/ExtentReport
 Para abrir el reporte, simplemente haz doble clic en el archivo o ábrelo en un navegador.
 
