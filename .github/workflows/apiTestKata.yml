@@ -1,0 +1,67 @@
+# Nombre del workflow, se mostrará en la interfaz de GitHub Actions
+name: API Automation Tests Kata Ingrid Rivera
+
+# Eventos que activan el workflow
+on:
+  push:
+    branches:
+      - main  # Se ejecuta automáticamente cuando se suben cambios a la rama "main"
+  schedule:
+    - cron: "00 6 * * *"  # Programación automática: se ejecuta todos los días a las 6:00 AM UTC
+  workflow_dispatch:  # Permite ejecutar el workflow de forma manual desde GitHub Actions
+
+# Definición de los jobs (tareas) que se ejecutarán en el workflow
+jobs:
+  run-api-tests:
+    # Define el sistema operativo donde se ejecutará el workflow (Ubuntu en este caso)
+    runs-on: ubuntu-latest
+
+    # Estrategia para ejecución en paralelo y configuración de tests
+    strategy:
+      fail-fast: false  # Si una prueba falla, las demás siguen ejecutándose
+      max-parallel: 3  # Ejecuta hasta 3 pruebas simultáneamente para optimizar el tiempo de ejecución
+      matrix:
+        test_class:
+          - "co.com.bancodebogota.apisTest.GetTest"    # Pruebas para el método GET
+          - "co.com.bancodebogota.apisTest.PostTest"   # Pruebas para el método POST
+          - "co.com.bancodebogota.apisTest.PutTest"    # Pruebas para el método PUT
+          - "co.com.bancodebogota.apisTest.DeleteTest" # Pruebas para el método DELETE
+
+    steps:
+      # Paso 1: Clonar el repositorio desde GitHub
+      - name: Checkout del código
+        uses: actions/checkout@v4  # Descarga el código fuente del repositorio en la máquina virtual
+
+      # Paso 2: Configurar el entorno de Java
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4  # Usa la acción oficial de GitHub para instalar Java
+        with:
+          distribution: 'temurin'  # JDK de Eclipse Temurin (recomendado para CI/CD)
+          java-version: '17'  # Se usa la versión 17 de Java
+          cache: maven  # Habilita caché de dependencias Maven para acelerar futuras ejecuciones
+
+      # Paso 3: Instalar dependencias y compilar el proyecto
+      - name: Instalar dependencias y compilar
+        run: mvn clean install -DskipTests  # Se construye el proyecto sin ejecutar pruebas aún
+
+      # Paso 4: Ejecutar las pruebas de API usando TestNG
+      - name: Ejecutar pruebas de API con TestNG
+        run: mvn test -Dtest=${{ matrix.test_class }}  # Ejecuta solo la clase de prueba que corresponda
+
+      # Paso 5: Subir los reportes de ejecución (TestNG y ExtentReports) como artefactos en GitHub
+      - name: Subir reportes de TestNG y ExtentReports
+        if: always()  # Este paso se ejecutará siempre, incluso si fallan las pruebas
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-${{ matrix.test_class }}  # Nombre del artefacto que se guardará en GitHub
+          path: |
+            test-output/  # Carpeta donde se guardan los reportes de TestNG
+            target/surefire-reports/  # Reportes generados por Maven Surefire
+            test-output/*.html  # Reportes en formato HTML generados por ExtentReports
+      - name: Subir reportes de pruebas fallidas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+
