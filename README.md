@@ -166,23 +166,31 @@ Para más detalles, consulta el archivo [`.github/workflows/apiTestKata.yml`](.g
 🔄 Ejecución en paralelo (Configuración TestNG)
 📌 Configuración en testng.xml para ejecutar pruebas en paralelo:
 ```xml
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Definición del tipo de documento de TestNG -->
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 
+<!-- Inicio de la suite de pruebas -->
 <suite name="Suite" thread-count="3" parallel="methods">
+
+    <!-- Configuración de los listeners para generar reportes y capturar eventos -->
     <listeners>
+        <!-- ExtentReportListener se encarga de generar reportes detallados de ejecución -->
         <listener class-name="co.com.bancodebogota.Utils.ExtentReportListener"/>
     </listeners>
 
+    <!-- Definición de un grupo de pruebas llamado "API Tests" -->
     <test name="API Tests">
         <classes>
+            <!-- Se definen las clases de prueba que se ejecutarán -->
             <class name="co.com.bancodebogota.apisTest.GetTest"/>
             <class name="co.com.bancodebogota.apisTest.PostTest"/>
             <class name="co.com.bancodebogota.apisTest.PutTest"/>
             <class name="co.com.bancodebogota.apisTest.DeleteTest"/>
         </classes>
     </test>
+
 </suite>
 
 ```
